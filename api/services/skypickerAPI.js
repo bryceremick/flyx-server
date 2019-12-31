@@ -1,4 +1,5 @@
 const skypicker = require("skypicker");
+const elasticsearch = require("./elasticsearchAPI");
 const utility_functions = require("../helpers/utility");
 
 module.exports.oneWaySearch = async function(

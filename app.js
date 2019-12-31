@@ -23,6 +23,9 @@ initFirebase();
 const indexRouter = require('./api/routes/index');
 const notFoundRouter = require('./api/routes/notFound');
 const autocompleteRouter = require('./api/routes/autocomplete');
+const searchFlightsRouter = require('./api/routes/searchFlights');
+const userRouter = require('./api/routes/user');
+
 const app = express();
 
 // Utility middleware
@@ -35,7 +38,9 @@ app.use(logger("dev"));
 // app.use("/api/users", usersRouter);
 
 app.use('/', indexRouter);
-app.use('/autocomplete', autocompleteRouter)
+app.use('/user', userRouter);
+app.use('/autocomplete', autocompleteRouter);
+app.use('/search', searchFlightsRouter);
 
 
 app.use('*', notFoundRouter);

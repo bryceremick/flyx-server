@@ -1,94 +1,59 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
-
+// const User = require("../models/user");
+const admin = require("firebase-admin");
 const apiRes = require("../helpers/apiResponse");
+var db = admin.firestore();
 
-exports.signup = (req, res) => {
-  console.log(req.body);
-  User.find({ username: req.body.username })
-    .exec()
-    .then(user => {
-      if (user.length >= 1) {
-        apiRes.error(res, "User already exists.");
-      } else {
-        bcrypt.hash(req.body.password, 10, (err, hash) => {
-          if (err) {
-            apiRes.error(res, "An error occured.");
-          } else {
-            const user = new User({
-              _id: new mongoose.Types.ObjectId(),
-              username: req.body.username,
-              password: hash
-            });
-            user
-              .save()
-              .then(result => {
-                console.log(result);
-                apiRes.success(res, "User created");
-              })
-              .catch(err => {
-                console.log(err);
-                apiRes.error(res, "An error occured.");
-              });
+exports.verify = (req, res) => {
+  var uid = req.body.uid;
+  var email = req.body.email;
+
+  let usersRef = db.collection("users").doc(uid);
+
+  // search for specified user in DB
+  usersRef
+    .get()
+    .then(doc => {
+        // if user does not exist, create user in DB
+      if (!doc.exists) {
+        usersRef.set({
+          uid: uid,
+          email: email,
+          accessTier: 0,
+          remainingSearches: 25,
+          totalSearches: 0,
+          VIP: false,
+          beta: true,
+          });    
+
+          console.log('Created user in DB');
+          const payload = {
+            newUser: true,
+            remainingSearches: 25,
+            VIP: false,
+            beta: true,
           }
-        });
-      }
-    });
-};
+          console.log(payload);
+          return apiRes.successWithData(res, "New User", payload);
 
-exports.login = (req, res) => {
-  User.find({ username: req.body.username })
-    .exec()
-    .then(user => {
-      if (user.length < 1) {
-        apiRes.validationError(res, "Incorrect Username");
+      }else{
+        // if user does exist, respond with user
+        console.log('User already exists');
+
+        const payload = {
+          newUser: false,
+          remainingSearches: doc.data().remainingSearches,
+          VIP: doc.data().VIP,
+          beta: doc.data().beta,
+        }
+        console.log(doc.data());
+        console.log(payload);
+        return apiRes.successWithData(res, "User already exists", payload);
       }
-      bcrypt.compare(req.body.password, user[0].password, (err, result) => {
-        if (err) {
-          apiRes.validationError(res, "Incorrect Password");
-        }
-        if (result) {
-          const token = jwt.sign(
-            {
-              username: user[0].username,
-              userID: user[0]._id
-            },
-            process.env.JWT_SECRET,
-            {
-              expiresIn: "1h"
-            }
-          );
-          return apiRes.successWithData(res, "Successful Authorization", token);
-        }
-        apiRes.validationError(res, "Incorrect Password");
-      });
     })
     .catch(err => {
-      console.log(err);
-      apiRes.error(res, "An error occured.");
+      console.log("Error getting document", err);
+      return apiRes.error(res, "Something went wrong");
     });
 };
 
-exports.getUser = (req, res) => {
-  console.log(req.params);
-  User.find({ username: req.params.username })
-    .exec()
-    .then(user => {
-      return apiRes.successWithData(res, "User found", user[0].username);
-    })
-    .catch();
-};
 
-exports.deleteUser = (req, res, next) => {
-  User.remove({ _id: req.params.userID })
-    .exec()
-    .then(result => {
-      apiRes.success(res, "User deleted succesfully");
-    })
-    .catch(err => {
-      console.log(err);
-      apiRes.error(res, err);
-    });
-};
