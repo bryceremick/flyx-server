@@ -6,6 +6,7 @@ const logger = require("morgan");
 // const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const initFirebase = require("./api/services/firebaseConnection").initFirebaseAuth;
+const initPriceTicker = require("./api/jobs/priceTickerJob").initPriceTickerJob;
 initFirebase();
 
 // mongoose.connect(process.env.MONGODB, {
@@ -25,9 +26,10 @@ const notFoundRouter = require('./api/routes/notFound');
 const autocompleteRouter = require('./api/routes/autocomplete');
 const searchFlightsRouter = require('./api/routes/searchFlights');
 const userRouter = require('./api/routes/user');
+const livePricesRouter = require('./api/routes/livePrices');
 
 const app = express();
-
+initPriceTicker();
 // Utility middleware
 app.use(cors());
 app.use(bodyParser.json());
@@ -41,6 +43,7 @@ app.use('/', indexRouter);
 app.use('/user', userRouter);
 app.use('/autocomplete', autocompleteRouter);
 app.use('/search', searchFlightsRouter);
+app.use('/liveprices', livePricesRouter);
 
 
 app.use('*', notFoundRouter);
