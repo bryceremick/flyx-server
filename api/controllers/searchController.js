@@ -7,6 +7,7 @@ var db = admin.firestore();
 const TICKET_LIMIT = 100;
 
 exports.searchFlights = async (req, res) => {
+
   const userInput = {
     uid: req.body.uid,
     oneWay: req.body.oneWay,
@@ -39,6 +40,11 @@ exports.searchFlights = async (req, res) => {
       }
     }
   };
+
+  if (moment(req.body.returnDepartureWindow.start).isBefore(req.body.departureWindow.end)){
+    console.log("invalid search dates");
+    return apiRes.error(res, "Invalid search dates");
+  }
 
   // create reference to user document in the firebase "users" collection
   let usersRef = db.collection("users").doc(userInput.uid);
@@ -79,14 +85,19 @@ exports.searchFlights = async (req, res) => {
               // if NOT VIP...
 
               // decrement user's remaining searches
-              var decrementedSearches = USER.remainingSearches;
-              decrementedSearches--;
+              let remainingSearches = USER.remainingSearches;
+              let totalSearches = USER.totalSearches;
+              remainingSearches--;
+              totalSearches++;
 
               // Update user data in firestore
-              usersRef.update({ remainingSearches: decrementedSearches });
+              usersRef.update({ 
+                remainingSearches,
+                totalSearches
+              });
 
               const payload = {
-                remainingSearches: decrementedSearches,
+                remainingSearches,
                 tickets: results
               };
 

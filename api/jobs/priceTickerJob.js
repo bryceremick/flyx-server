@@ -20,53 +20,41 @@ const departureWindow= {
     }
 };
 
-var ticketsLAXtoJFK;
-var ticketsLGAtoORD;
-var ticketsSFOtoLAX;
+new CronJob('0 0 */1 * * *', async () => { 
+  console.log("Started price ticker job");
+    const a = await API.radiusSearch(
+        TICKET_LIMIT,
+        ONE_WAY,
+        'LAX',
+        'JFK',
+        100,
+        100,
+        departureWindow,
+        null
+      );
 
-module.exports.getPriceTickerTickets = () => {
-    return {
-        ticketsLAXtoJFK: ticketsLAXtoJFK,
-        ticketsLGAtoORD: ticketsLGAtoORD,
-        ticketsSFOtoLAX: ticketsSFOtoLAX
-    }
-}
+      const b = await API.radiusSearch(
+        TICKET_LIMIT,
+        ONE_WAY,
+        'LGA',
+        'ORD',
+        100,
+        100,
+        departureWindow,
+        null
+      );
 
-module.exports.initPriceTickerJob = () => {
-    new CronJob('0 0 */1 * * *', async () => { 
-        ticketsLAXtoJFK = await API.radiusSearch(
-            TICKET_LIMIT,
-            ONE_WAY,
-            'LAX',
-            'JFK',
-            100,
-            100,
-            departureWindow,
-            null
-          );
-    
-          ticketsLGAtoORD = await API.radiusSearch(
-            TICKET_LIMIT,
-            ONE_WAY,
-            'LGA',
-            'ORD',
-            100,
-            100,
-            departureWindow,
-            null
-          );
-    
-          ticketsSFOtoLAX = await API.radiusSearch(
-            TICKET_LIMIT,
-            ONE_WAY,
-            'SFO',
-            'LAX',
-            100,
-            100,
-            departureWindow,
-            null
-          );
-          console.log(ticketsLAXToJFK);
-          console.log("Started price ticker job");
-    }, null, true, 'America/Los_Angeles', null,true);
-}
+      const c = await API.radiusSearch(
+        TICKET_LIMIT,
+        ONE_WAY,
+        'SFO',
+        'LAX',
+        100,
+        100,
+        departureWindow,
+        null
+      );
+      module.exports.ticketsLAXtoJFK = a;
+      module.exports.ticketsLGAtoORD = b;
+      module.exports.ticketsSFOtoLAX = c;
+}, null, true, 'America/Los_Angeles', null,true);

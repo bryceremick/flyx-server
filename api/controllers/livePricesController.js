@@ -1,15 +1,15 @@
 const apiRes = require("../helpers/apiResponse");
-const tickets = require("../jobs/priceTickerJob").getPriceTickerTickets;
+const livePrices = require("../jobs/priceTickerJob");
 
-console.log(tickets.ticketsLAXToJFK);
+// console.log(tickets.ticketsLAXToJFK);
 
 module.exports.priceticker = async (req, res) => {
   if (req.query["airportFrom"] == "LAX") {
-    apiRes.successWithData(res, "Success", tickets.ticketsLAXToJFK);
+    apiRes.successWithData(res, "Success", livePrices.ticketsLAXtoJFK);
   } else if (req.query["airportFrom"] == "LGA") {
-    apiRes.successWithData(res, "Success", tickets.ticketsLGAToORD);
+    apiRes.successWithData(res, "Success", livePrices.ticketsLGAtoORD);
   } else if (req.query["airportFrom"] == "SFO") {
-    apiRes.successWithData(res, "Success", tickets.ticketsSFOToLAX);
+    apiRes.successWithData(res, "Success", livePrices.ticketsSFOtoLAX);
   } else {
     apiRes.validationError(res, "Invalid Parameters");
   }

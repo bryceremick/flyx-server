@@ -3,21 +3,9 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const logger = require("morgan");
-// const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const initFirebase = require("./api/services/firebaseConnection").initFirebaseAuth;
-const initPriceTicker = require("./api/jobs/priceTickerJob").initPriceTickerJob;
 initFirebase();
-
-// mongoose.connect(process.env.MONGODB, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true
-// });
-
-// const db = mongoose.connection;
-// db.on("error", console.error.bind(console, "MongoDB connection error:"));
-
-// const usersRouter = require("./api/routes/users");
 
 
 // import routes
@@ -29,7 +17,6 @@ const userRouter = require('./api/routes/user');
 const livePricesRouter = require('./api/routes/livePrices');
 
 const app = express();
-initPriceTicker();
 // Utility middleware
 app.use(cors());
 app.use(bodyParser.json());
