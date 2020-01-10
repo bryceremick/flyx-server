@@ -35,6 +35,6 @@ app.use('/liveprices', livePricesRouter);
 
 app.use('*', notFoundRouter);
 
-app.listen(process.env.PORT);
+// app.listen(process.env.PORT);
 
 module.exports = app
